@@ -7,11 +7,11 @@ import java.util.stream.Stream;
 
 /**
  * @author David W. Arnold
- * @version 03/06/2019
+ * @version 31/08/2019
  */
 public class Main
 {
-    // The Java main method, used to start the execution of the CSV to TXT Conversion Tool.
+    // The Java main method, used to start the execution of the CSV to TXT Converter.
     public static void main(String[] args) throws FileNotFoundException
     {
         // The directory containing *.csv inputs.
@@ -61,7 +61,18 @@ public class Main
         // Creates the input and output directories, and records whether the output directory was created.
         boolean outputCreated = makeDirectory(input, output);
 
-        if (!outputCreated) {
+        // Checks if the outputs directory contains at least one *.txt file, and deletes any non *.txt files.
+        boolean outputContainsTxtFiles = false;
+        for (File file : (new File(output)).listFiles()) {
+            if (!getFileExtension(file.toString()).equals("txt")) {
+                file.delete();
+            } else {
+                outputContainsTxtFiles = true;
+            }
+        }
+
+        // If the outputs directory already existed, and so long as the outputs directory contains at least one *.txt file.
+        if (!outputCreated && outputContainsTxtFiles) {
             // Copy old *.txt outputs to the temporary directory.
             try {
                 copyDirectory(new File(output), new File(tmp), true, "txt");
@@ -97,13 +108,14 @@ public class Main
         }
 
         // Create diff *.txt files, if possible.
-        if (!outputCreated) {
+        if (!outputCreated && outputContainsTxtFiles) {
             // Creates the diff_outputs directory, if it doesn't already exist.
             File diffPath = new File(readyPath(diff));
             if(!diffPath.exists()) {
                 diffPath.mkdir();
+
             }
-            // Tests if 'clearDiffOutputs' is set to true, else.
+            // Whether the user has specified to 'clearDiffOutputs' to be set to true or false.
             if (clearDiffOutputs) {
                 // Delete old diff *.txt files.
                 deleteDirContents(new File(diff));
@@ -127,7 +139,13 @@ public class Main
             deleteDir(new File(tmp));
         }
 
-        System.out.println("\nCSV to TXT Converter complete!\n\nPlease check the './outputs' directory for the TXT outputs.\n");
+        // Completion message sent to standard output.
+        boolean diff_outputExists = new File(diff).exists();
+        if (diff_outputExists) {
+            System.out.println("\nCSV to TXT Converter complete!\n\nPlease see the './outputs' directory for the TXT outputs.\n\nPlease see the './diff_outputs' directory for the difference between the old and most recent TXT outputs.\n");
+        } else {
+            System.out.println("\nCSV to TXT Converter complete!\n\nPlease see the './outputs' directory for the TXT outputs.\n");
+        }
     }
 
     //Creates input and output directories, if they don't already exist.
