@@ -113,7 +113,6 @@ public class Main
             File diffPath = new File(readyPath(diff));
             if(!diffPath.exists()) {
                 diffPath.mkdir();
-
             }
             // Whether the user has specified to 'clearDiffOutputs' to be set to true or false.
             if (clearDiffOutputs) {
