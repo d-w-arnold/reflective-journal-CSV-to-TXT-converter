@@ -1,6 +1,6 @@
 # Java: Reflective Journal_CSV to TXT Converter
 
-\*\***IMPORTANT**\*\*: This project is aimed at someone keeping a daily Reflective Journal, week-on-week, especially during a Year in Industry (university sandwich year) placement.
+\*\***IMPORTANT**\*\*: This project is aimed at Year in Industry (university sandwich year) placement students, who may be required to keep a daily Reflective Journal, week-on-week.
 
 ---
 
@@ -46,13 +46,7 @@ Prerequisite:
     foo@bar:~$ javac -cp ".:lib/*" Main.java
     ```
 
-    This will produce a file: (located in the same directory)
-    
-    ```console
-    Main.class
-    ```
-    
-    Which is a compiled version of the `Main.java` file.
+    This will produce a `Main.class` file in the same directory. This is a compiled version of the `Main.java` file.
 
 5. Run the Java 'Main' method:
 
@@ -65,14 +59,24 @@ Prerequisite:
     ```console
     CSV to TXT Converter complete!
     
-    Please check the './outputs' directory for the TXT outputs.
+    Please see the './outputs' directory for the TXT outputs.
+    ```
+    
+    If you have generated TXT outputs previously, you will see an alternative message:
+    
+    ```console
+    CSV to TXT Converter complete!
+    
+    Please see the './outputs' directory for the TXT outputs.
+    
+    Please see the './diff_outputs' directory for the difference between the old and most recent TXT outputs.
     ```
 
 (Windows)
 
 1. Click "Clone or download" (top right), and unzip the downloaded zip file.
 
-2. Open the "cmd.exe" application.
+2. Open the "Command Prompt" ("cmd.exe") application, which may need to be 'Run as Administrator'.
 
 3. Navigate to the Java project directory. For example:
 
@@ -83,14 +87,34 @@ Prerequisite:
     C:\Users\foobar> cd Documents\Reflective-Journal_CSV-to-TXT-Converter
     ```
 
-4. Compile
+4. Compile the Java 'Main' method:
 
-5. Run
+    ```console
+    C:\Users\foobar> javac -cp ".;lib/*" Main.java
+    ```
 
+    This will produce a `Main.class` file in the same directory. This is a compiled version of the `Main.java` file.
+
+5. Run the Java 'Main' method:
+
+    ```console
+    C:\Users\foobar> java -cp ".;lib/*" Main
+    ```
+    
     When the Java 'Main' method has finished successfully, a message will be returned to the standard output:
     
     ```console
     CSV to TXT Converter complete!
     
-    Please check the './outputs' directory for the TXT outputs.
+    Please see the './outputs' directory for the TXT outputs.
+    ```
+    
+    If you have generated TXT outputs previously, you will see an alternative message:
+    
+    ```console
+    CSV to TXT Converter complete!
+    
+    Please see the './outputs' directory for the TXT outputs.
+    
+    Please see the './diff_outputs' directory for the difference between the old and most recent TXT outputs.
     ```
