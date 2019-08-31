@@ -82,14 +82,14 @@ Prerequisite:
 
     (Do not type the `C:\Users\foobar>`, as this represents the Command Line prompt)
 
-    ```console
+    ```bat
     C:\Users\foobar> cd ~
     C:\Users\foobar> cd Documents\Reflective-Journal_CSV-to-TXT-Converter
     ```
 
 4. Compile the Java 'Main' method:
 
-    ```console
+    ```bat
     C:\Users\foobar> javac -cp ".;lib/*" Main.java
     ```
 
@@ -97,7 +97,7 @@ Prerequisite:
 
 5. Run the Java 'Main' method:
 
-    ```console
+    ```bat
     C:\Users\foobar> java -cp ".;lib/*" Main
     ```
     
