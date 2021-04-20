@@ -1,6 +1,6 @@
-# Java: Reflective Journal_CSV to TXT Converter
+# CSV to TXT Converter
 
-\*\***IMPORTANT**\*\*: This project is aimed at Year in Industry (university sandwich year) placement students, who may be required to keep a daily Reflective Journal, week-on-week.
+**IMPORTANT**: This project is aimed at Year in Industry (university sandwich year) placement students, who may be required to keep a daily Reflective Journal, week-on-week.
 
 ---
 
@@ -37,13 +37,13 @@ Prerequisite:
     (Do not type the `foo@bar:~$`, as this represents the Command Line prompt)
 
     ```console
-    foo@bar:~$ cd ~/Documents/Reflective-Journal_CSV-to-TXT-Converter
+    cd ~/Documents/Reflective-Journal_CSV-to-TXT-Converter
     ```
 
 4. Compile the Java 'Main' method:
 
     ```console
-    foo@bar:~$ javac -cp ".:lib/*" Main.java
+    javac -cp ".:lib/*" Main.java
     ```
 
     This will produce a `Main.class` file in the same directory. This is a compiled version of the `Main.java` file.
@@ -51,7 +51,7 @@ Prerequisite:
 5. Run the Java 'Main' method:
 
     ```console
-    foo@bar:~$ java -cp ".:lib/*" Main
+    java -cp ".:lib/*" Main
     ```
     
     When the Java 'Main' method has finished successfully, a message will be returned to the standard output:
@@ -83,14 +83,14 @@ Prerequisite:
     (Do not type the `C:\Users\foobar>`, as this represents the Command Line prompt)
 
     ```bat
-    C:\Users\foobar> cd ~
-    C:\Users\foobar> cd Documents\Reflective-Journal_CSV-to-TXT-Converter
+    cd ~
+    cd Documents\Reflective-Journal_CSV-to-TXT-Converter
     ```
 
 4. Compile the Java 'Main' method:
 
     ```bat
-    C:\Users\foobar> javac -cp ".;lib/*" Main.java
+    javac -cp ".;lib/*" Main.java
     ```
 
     This will produce a `Main.class` file in the same directory. This is a compiled version of the `Main.java` file.
@@ -98,7 +98,7 @@ Prerequisite:
 5. Run the Java 'Main' method:
 
     ```bat
-    C:\Users\foobar> java -cp ".;lib/*" Main
+    java -cp ".;lib/*" Main
     ```
     
     When the Java 'Main' method has finished successfully, a message will be returned to the standard output:
