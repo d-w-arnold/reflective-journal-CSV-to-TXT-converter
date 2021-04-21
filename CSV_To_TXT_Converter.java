@@ -14,127 +14,149 @@ import java.util.stream.Stream;
  */
 public class CSV_To_TXT_Converter
 {
-    // The directory containing *.csv inputs.
-    private final String input;
-    // The directory containing *.txt outputs.
-    private final String output;
-    // The directory containing the diff *.txt files.
-    private final String diff;
-    // The separator used for *.csv inputs, because of this when needing to use a ',' in my Reflective Journal, I would use a '/' instead.
-    private final char separator;
+    // File extensions.
+    private final String TXT_EXT = "txt";
+    private final String CSV_EXT = "csv";
+    // Custom string separators for writing to output files.
+    private final String DELTA_SEP = "--";
+    private final String OUTPUT_SEP = " " + DELTA_SEP + " ";
+    // The separator character used in the CSV inputs (e.g ',').
+    private final char CSV_SEP;
+    // The character used to substitute for a separator character in output text
+    //  (e.g. use a '/' char in place for a ',' char in output text, as ',' is used as the CSV_SEP instead).
+    private final char CSV_SEP_SUB;
+    // The directory containing CSV inputs.
+    private final String INPUT_DIR;
+    // The directory containing TXT outputs.
+    private final String OUTPUT_DIR;
+    // The directory containing the diff TXT files.
+    private final String DIFF_DIR;
+    // A temporary directory for the previous TXT outputs.
+    private final String TMP_OUTPUT_DIR;
+    // The default filename for all TXT outputs.
+    private final String OUTPUT_FILE_DEFAULT_NAME;
+    // The default filename for all diff TXT outputs.
+    private final String DIFF_FILE_DEFAULT_NAME;
     // Number of questions asked each day in my Reflective Journal.
-    private final int numOfQuestions;
-    // clearDiffOutputs == true: The previous diff *.txt files will be deleted, so only the content of the most recent diff *.txt files will be available.
-    // clearDiffOutputs == false: The content of the previous diff *.txt files will be added to the most recent diff *.txt files.
-    private final boolean clearDiffOutputs;
-    // Different types of separators used, all in one place, so when used multiple times throughout the java file them stay consistent.
-    // TODO Implement a boolean, to decide whether *.txt outputs feature a line separator concatenated to the beginning of all line except the first line.
-    private final String deltaSeparator = "--";
-    private final String outputSeparator = " " + deltaSeparator + " ";
+    private final int NUM_OF_QUESTIONS;
+    // true: The previous diff TXT files will be deleted, so only the content of the most recent diff TXT files will be available.
+    // false: The content of the previous diff TXT files will be added to the most recent diff TXT files.
+    private final boolean CLEAR_DIFF_OUTPUTS;
+    // true: Concatenated to the beginning of all output lines except, the first line, the OUTPUT_SEP string.
+    // false: Do not concatenated to the beginning of any output lines.
+    private final boolean INCLUDE_OUTPUT_SEP;
 
-    public CSV_To_TXT_Converter(String inputDir, String outputDir, String diffDir, char sep, int numOfQuestions, boolean clearDiffOutputs)
+    public CSV_To_TXT_Converter(char sep, char sepSub, String inputDir, String outputDir, String diffDir, String outputFileDefaultName,
+                                int numOfQuestions, boolean clearDiffOutputs, boolean includeOutputSep)
     {
-        this.input = "." + File.separator + inputDir;
-        this.output = "." + File.separator + outputDir;
-        this.diff = "." + File.separator + diffDir;
-        this.separator = sep;
-        this.numOfQuestions = numOfQuestions;
-        this.clearDiffOutputs = clearDiffOutputs;
+        this.CSV_SEP = sep;
+        this.CSV_SEP_SUB = sepSub;
+        this.INPUT_DIR = "." + File.separator + inputDir;
+        this.OUTPUT_DIR = "." + File.separator + outputDir;
+        this.DIFF_DIR = "." + File.separator + diffDir;
+        this.TMP_OUTPUT_DIR = "." + File.separator + "tmp_" + OUTPUT_DIR;
+        this.OUTPUT_FILE_DEFAULT_NAME = outputFileDefaultName;
+        this.DIFF_FILE_DEFAULT_NAME = "diff_" + OUTPUT_FILE_DEFAULT_NAME;
+        this.NUM_OF_QUESTIONS = numOfQuestions;
+        this.CLEAR_DIFF_OUTPUTS = clearDiffOutputs;
+        this.INCLUDE_OUTPUT_SEP = includeOutputSep;
     }
 
     // CSV to TXT Converter, full execution.
     public void start() throws FileNotFoundException
     {
-        // A temporary directory for the previous *.txt outputs.
-        String tmp = "." + File.separator + "tmp_outputs";
-
         // Creates the input and output directories, and records whether the output directory was created.
         boolean outputCreated = makeDirectory();
 
-        // Checks if the outputs directory contains at least one *.txt file, and deletes any non *.txt files.
+        // Checks if the outputs directory contains at least one TXT file, and deletes any non-TXT files.
         boolean outputContainsTxtFiles = false;
-        for (File file : Objects.requireNonNull((new File(output)).listFiles())) {
-            if (!getFileExtension(file.toString()).equals("txt")) {
+        for (File file : Objects.requireNonNull((new File(OUTPUT_DIR)).listFiles())) {
+            if (!getFileExtension(file.toString()).equals(TXT_EXT)) {
                 file.delete();
             } else {
                 outputContainsTxtFiles = true;
             }
         }
 
-        // If the outputs directory already existed, and so long as the outputs directory contains at least one *.txt file.
+        // If the outputs directory already existed, and so long as the outputs directory contains at least one TXT file.
         if (!outputCreated && outputContainsTxtFiles) {
-            // Copy old *.txt outputs to the temporary directory.
+            // Copy old TXT outputs to the temporary directory.
             try {
-                copyDirectory(new File(output), new File(tmp), true, "txt");
+                copyDirectory(new File(OUTPUT_DIR), new File(TMP_OUTPUT_DIR), true, TXT_EXT);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            // Delete old *.txt outputs.
-            deleteDirContents(new File(output));
+            // Delete old TXT outputs.
+            deleteDirContents(new File(OUTPUT_DIR));
         }
 
-        // Execute each *.csv input to create a *.txt output.
-        File[] inputContents = new File(readyPath(input)).listFiles();
+        // Execute each TXT input to create a TXT output.
+        File[] inputContents = new File(readyPath(INPUT_DIR)).listFiles();
         List<File> inputFiles = new ArrayList<>();
         assert inputContents != null;
         if (inputContents.length > 0) {
             for (File file : inputContents) {
-                if (!file.isDirectory() && getFileExtension(file.toString()).equals("csv")) {
+                if (!file.isDirectory() && getFileExtension(file.toString()).equals(CSV_EXT)) {
                     inputFiles.add(file);
                 }
             }
             if (!inputFiles.isEmpty()) {
                 for (final File file : inputFiles) {
-                    for (int i = 0; i < numOfQuestions; i++) {
+                    for (int i = 0; i < NUM_OF_QUESTIONS; i++) {
                         execute(file.toString(), i + 1);
                     }
                 }
             } else {
-                System.out.println("The Input directory does not contain any *.csv inputs.");
+                System.out.println("The '" + INPUT_DIR + "' directory does not contain any " + CSV_EXT.toUpperCase() + " inputs.");
                 return;
             }
         } else {
-            System.out.println("The Input directory is empty.");
+            System.out.println("The '" + INPUT_DIR + "' directory is empty.");
             return;
         }
 
-        // Create diff *.txt files, if possible.
+        // Create diff TXT files, if possible.
         if (!outputCreated && outputContainsTxtFiles) {
             // Creates the diff_outputs directory, if it doesn't already exist.
-            File diffPath = new File(readyPath(diff));
+            File diffPath = new File(readyPath(DIFF_DIR));
             if (!diffPath.exists()) {
                 diffPath.mkdir();
             }
             // Whether the user has specified to 'clearDiffOutputs' to be set to true or false.
-            if (clearDiffOutputs) {
-                // Delete old diff *.txt files.
-                deleteDirContents(new File(diff));
-                // Find diff between previous and most recent *.txt outputs.
-                for (int i = 0; i < numOfQuestions; i++) {
-                    String oldInputPath = readyPath(tmp) + "question" + (i + 1) + ".txt";
-                    String newInputPath = readyPath(output) + "question" + (i + 1) + ".txt";
-                    String diff_outputPath = readyPath(diff) + "diff_question" + (i + 1) + ".txt";
-                    delta(oldInputPath, newInputPath, diff_outputPath, deltaSeparator);
+            if (CLEAR_DIFF_OUTPUTS) {
+                // Delete old diff TXT files.
+                deleteDirContents(new File(DIFF_DIR));
+                // Find diff between previous and most recent TXT outputs.
+                for (int i = 0; i < NUM_OF_QUESTIONS; i++) {
+                    String oldInputPath = readyPath(TMP_OUTPUT_DIR) + OUTPUT_FILE_DEFAULT_NAME + (i + 1) + "." + TXT_EXT;
+                    String newInputPath = readyPath(OUTPUT_DIR) + OUTPUT_FILE_DEFAULT_NAME + (i + 1) + "." + TXT_EXT;
+                    String diff_outputPath = readyPath(DIFF_DIR) + DIFF_FILE_DEFAULT_NAME + (i + 1) + "." + TXT_EXT;
+                    delta(oldInputPath, newInputPath, diff_outputPath);
                 }
             } else {
-                // Add the content of the previous diff *.txt files to the most recent diff *.txt files.
-                for (int i = 0; i < numOfQuestions; i++) {
-                    String oldInputPath = readyPath(tmp) + "question" + (i + 1) + ".txt";
-                    String newInputPath = readyPath(output) + "question" + (i + 1) + ".txt";
-                    String diff_outputPath = readyPath(diff) + "diff_question" + (i + 1) + ".txt";
-                    stackDelta(oldInputPath, newInputPath, diff_outputPath, deltaSeparator);
+                // Add the content of the previous diff TXT files to the most recent diff TXT files.
+                for (int i = 0; i < NUM_OF_QUESTIONS; i++) {
+                    String oldInputPath = readyPath(TMP_OUTPUT_DIR) + OUTPUT_FILE_DEFAULT_NAME + (i + 1) + "." + TXT_EXT;
+                    String newInputPath = readyPath(OUTPUT_DIR) + OUTPUT_FILE_DEFAULT_NAME + (i + 1) + "." + TXT_EXT;
+                    String diff_outputPath = readyPath(DIFF_DIR) + DIFF_FILE_DEFAULT_NAME + (i + 1) + "." + TXT_EXT;
+                    stackDelta(oldInputPath, newInputPath, diff_outputPath);
                 }
             }
-            // Delete the temporary directory containing the previous *.txt outputs.
-            deleteDir(new File(tmp));
+            // Delete the temporary directory containing the previous TXT outputs.
+            deleteDir(new File(TMP_OUTPUT_DIR));
         }
 
         // Completion message sent to standard output.
-        boolean diff_outputExists = new File(diff).exists();
+        boolean diff_outputExists = new File(DIFF_DIR).exists();
+        String completeMsg = "\n" + CSV_EXT.toUpperCase() + " to " + TXT_EXT.toUpperCase() + " Converter complete!\n" +
+                "\nPlease see the '" + OUTPUT_DIR + "' directory for the " + TXT_EXT.toUpperCase() + " outputs.\n";
         if (diff_outputExists) {
-            System.out.println("\nCSV to TXT Converter complete!\n\nPlease see the './outputs' directory for the TXT outputs.\n\nPlease see the './diff_outputs' directory for the difference between the old and most recent TXT outputs.\n");
+            System.out.println(completeMsg +
+                    "\nPlease see the '" + DIFF_DIR +
+                    "' directory for the difference between the old and most recent " +
+                    TXT_EXT.toUpperCase() + " outputs.\n");
         } else {
-            System.out.println("\nCSV to TXT Converter complete!\n\nPlease see the './outputs' directory for the TXT outputs.\n");
+            System.out.println(completeMsg);
         }
     }
 
@@ -142,11 +164,11 @@ public class CSV_To_TXT_Converter
     private boolean makeDirectory()
     {
         boolean outputCreated = false;
-        File inputPath = new File(readyPath(input));
+        File inputPath = new File(readyPath(INPUT_DIR));
         if (!inputPath.exists()) {
             inputPath.mkdir();
         }
-        File outputPath = new File(readyPath(output));
+        File outputPath = new File(readyPath(OUTPUT_DIR));
         if (!outputPath.exists()) {
             outputPath.mkdir();
             outputCreated = true;
@@ -171,7 +193,7 @@ public class CSV_To_TXT_Converter
         }
     }
 
-    // Copy only a *.csv file from a source location to a target location.
+    // Copy only a CSV file from a source location to a target location.
     private void copyFiles(File sourceFile, File destFile, boolean specificExt, String extension) throws IOException
     {
         if (specificExt && getFileExtension(sourceFile.toString()).equals(extension)) {
@@ -198,8 +220,8 @@ public class CSV_To_TXT_Converter
         if (!destFile.exists()) {
             destFile.createNewFile();
         }
-        FileChannel source = null;
-        FileChannel destination = null;
+        FileChannel source;
+        FileChannel destination;
         source = new FileInputStream(sourceFile).getChannel();
         destination = new FileOutputStream(destFile).getChannel();
         if (destination != null && source != null) {
@@ -236,15 +258,15 @@ public class CSV_To_TXT_Converter
         }
     }
 
-    // Execute a *.csv input to create a *.txt output.
+    // Execute a CSV input to create a TXT output.
     private void execute(String filePath, int question)
     {
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new FileReader(filePath), separator);
+            reader = new CSVReader(new FileReader(filePath), CSV_SEP);
             String[] nextLine;
             int y = 0;
-            //Read one line at a time
+            // Read one line at a time
             while ((nextLine = reader.readNext()) != null) {
                 if (y == question) {
                     int x = 0;
@@ -254,7 +276,7 @@ public class CSV_To_TXT_Converter
                             if (cell.equals("")) {
                                 x++;
                             } else if (cell.contains("\n")) {
-                                String singleOutputSeparator = "\n" + outputSeparator;
+                                String singleOutputSeparator = "\n" + OUTPUT_SEP;
                                 writeOutputFile(question, cell.replaceAll("\n", singleOutputSeparator));
                             } else {
                                 writeOutputFile(question, cell);
@@ -279,26 +301,31 @@ public class CSV_To_TXT_Converter
         }
     }
 
-    // Write a string from a *.csv file, and writes it to the bottom of a *.txt file.
+    // Write a string from a CSV file, and writes it to the bottom of a TXT file.
     private void writeOutputFile(int question, String str)
     {
         try {
-            String fullPath = readyPath(output) + "question" + question + ".txt";
-            if (new File(fullPath).exists()) {
-                str = outputSeparator + str;
+            String fullPath = readyPath(OUTPUT_DIR) + OUTPUT_FILE_DEFAULT_NAME + question + "." + TXT_EXT;
+            // Include OUTPUT_SEP only if INCLUDE_OUTPUT_SEP == true,
+            //  and if it's not the first line of a TXT output file.
+            if (INCLUDE_OUTPUT_SEP && new File(fullPath).exists()) {
+                str = OUTPUT_SEP + str;
             }
             BufferedWriter out = new BufferedWriter(new FileWriter(fullPath, true));
-            // Change all '/' to a ',', and write the answer for a question in the week to the bottom of the *.txt file.
-            out.write(str.replaceAll("/", ",") + "\n");
+            // Write the answer for a question in the week to the bottom of the TXT file,
+            //  and change all CSV_SEP_SUB to a CSV_SEP before writing.
+            out.write(str.replaceAll(String.valueOf(CSV_SEP_SUB), String.valueOf(CSV_SEP)) + "\n");
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Creates diff *.txt files from scratch.
-    // TODO Sort out diff *.txt files not identifying duplicate answers in multiple *.txt inputs (test1.csv and test3.csv inputs being the same answers, test3.csv gets added in the next run, but added answers not appearing in the diff *.txt files).
-    private void delta(String oldInputPath, String newInputPath, String diff_outputPath, String deltaSeparator) throws FileNotFoundException
+    // Creates diff TXT files from scratch.
+    // TODO Sort out diff TXT files not identifying duplicate answers in multiple TXT inputs
+    //  (test1.csv and test3.csv inputs being the same answers, test3.csv gets added in the next run,
+    //  but added answers not appearing in the diff TXT files).
+    private void delta(String oldInputPath, String newInputPath, String diff_outputPath) throws FileNotFoundException
     {
         String sCurrentLine;
         List<String> list1 = new ArrayList<>();
@@ -319,7 +346,7 @@ public class CSV_To_TXT_Converter
             for (String listEntry : tmpList) {
                 out.write(listEntry + "\n");
             }
-            out.write("\n" + deltaSeparator + "\n\n");
+            out.write("\n" + DELTA_SEP + "\n\n");
             out.write("Content added to new file: (" + newInputPath + ")\n\n");
             tmpList = list2;
             tmpList.removeAll(list1);
@@ -332,14 +359,14 @@ public class CSV_To_TXT_Converter
         }
     }
 
-    // Creates diff *.txt files, including the contents of the previous diff *.txt files.
-    private void stackDelta(String oldInputPath, String newInputPath, String diff_outputPath, String deltaSeparator) throws FileNotFoundException
+    // Creates diff TXT files, including the contents of the previous diff TXT files.
+    private void stackDelta(String oldInputPath, String newInputPath, String diff_outputPath) throws FileNotFoundException
     {
         List<String> lines = new ArrayList<>();
 
         File diff_outputFile = new File(diff_outputPath);
         if (!diff_outputFile.exists()) {
-            delta(oldInputPath, newInputPath, diff_outputPath, deltaSeparator);
+            delta(oldInputPath, newInputPath, diff_outputPath);
             return;
         }
 
@@ -352,7 +379,7 @@ public class CSV_To_TXT_Converter
             int i = 0;
             int customLine = 0;
             for (String l : lines) {
-                if (l.equals(deltaSeparator)) {
+                if (l.equals(DELTA_SEP)) {
                     customLine = i - 1;
                 } else {
                     i++;
@@ -401,7 +428,7 @@ public class CSV_To_TXT_Converter
         }
     }
 
-    // Remove entries which have been both added and removed in the same diff *.txt file.
+    // Remove entries which have been both added and removed in the same diff TXT file.
     private List<String> removeDiffDuplicates(List<String> targetList, List<String> removerList)
     {
         List<String> tmpHead = new ArrayList<>();

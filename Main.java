@@ -10,9 +10,9 @@ public class Main
     {
         try {
             CSV_To_TXT_Converter converter = new CSV_To_TXT_Converter(
-                    "inputs", "outputs",
-                    "diff_outputs", ',',
-                    22, false
+                    ',', '/', "inputs", "outputs",
+                    "diff_outputs", "question",
+                    22, false, true
             );
             converter.start();
         } catch (FileNotFoundException e) {
