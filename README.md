@@ -34,8 +34,6 @@ Prerequisite:
 
 3. Navigate to the Java project directory. For example:
 
-    (Do not type the `foo@bar:~$`, as this represents the Command Line prompt)
-
     ```console
     cd ~/Documents/Reflective-Journal_CSV-to-TXT-Converter
     ```
@@ -79,8 +77,6 @@ Prerequisite:
 2. Open the "Command Prompt" ("cmd.exe") application, which may need to be 'Run as Administrator'.
 
 3. Navigate to the Java project directory. For example:
-
-    (Do not type the `C:\Users\foobar>`, as this represents the Command Line prompt)
 
     ```bat
     cd ~
