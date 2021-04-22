@@ -34,13 +34,13 @@ Prerequisite:
 
 3. Navigate to the Java project directory. For example:
 
-    ```console
+    ```shell
     cd ~/Documents/Reflective-Journal_CSV-to-TXT-Converter
     ```
 
 4. Compile the Java 'Main' method:
 
-    ```console
+    ```shell
     javac -cp ".:lib/*" Main.java
     ```
 
@@ -48,7 +48,7 @@ Prerequisite:
 
 5. Run the Java 'Main' method:
 
-    ```console
+    ```shell
     java -cp ".:lib/*" Main
     ```
     
